@@ -22,34 +22,16 @@ class Node implements Comparable<Node>{
 
 }
 
-class Result{
 
-
-
-	String sourceToEnd;
-	int totalWeight;
-	String shortestPath;
-
-	public Result(int s, int e){
-		this.sourceToEnd = String.valueOf(s) + String.valueOf(e);
-		
-	}
-}
-
-
-public class DijkstraSolver 
+public class DijkstraSolver
 {
 
 	// Edit this number to adjust for the size of the graph
 	int N = 7;
 	// int N = 100;
 
-	// Creating an adjacency Matrix 
+	// Creating an adjacency Matrix
 	int [][] matrix;
-
-
-
-
 
 
 	String [] cities = {"SF", "SE", "DA", "DE", "CH", "AT", "DC"};
@@ -64,7 +46,7 @@ public class DijkstraSolver
 		Scanner scan = new Scanner(new File(fileName));
 
 		matrix = new int [N][N];
-	
+
 
 		// Formatting for debugging
 		System.out.print("   ");
@@ -78,20 +60,20 @@ public class DijkstraSolver
 
 
 		for (int i = 0; i < N; i++){
-	
+
 			int rowNum = scan.nextInt();
-		
+
 			// Ignoring the tab
 			scan.skip("\t");
-					
+
 			String str = scan.nextLine();
-		
+
 			// Setting up the string for parsing
-			str = str.replace(",", " ");	
-	
+			str = str.replace(",", " ");
+
 			// Begin to parse string
 			Scanner strScan = new Scanner(str);
-			
+
 
 			for (int j = 0; j < N; j++){
 				if(strScan.hasNextInt())
@@ -102,8 +84,8 @@ public class DijkstraSolver
 
 			System.out.println(i + " " + Arrays.toString(matrix[i]));
 
-		}		
-		
+		}
+
 	}
 
 	public static void writeToFile(String filename, String input){
@@ -117,36 +99,40 @@ public class DijkstraSolver
 
 		}catch(IOException f){
 			System.out.println("Error in: findContrainedShortestPaths(" + filename +")\n Exception: " + f);
-		}		
-		
+		}
+
 
 	}
 	public static void appendToFile(String filename, String input){
-		try{	
+		try{
 			FileWriter writer = new FileWriter(filename, true);
 			writer.write(input);
 			writer.close();
 			System.out.println("Input: " + input +" written to File: " + filename);
 			System.out.println();
 		}catch(IOException f){
-			System.out.println("Error in: findContrainedShortestPaths(" + filename +")\n Exception: " + f);				
+			System.out.println("Error in: findContrainedShortestPaths(" + filename +")\n Exception: " + f);
 		}
 	}
 
-	public Result findShortestPath(String filename, int s, int e)
+	public int findShortestPath(String filename, int s, int e)
 	{
-		Result result = new Result(s, e);
-		
+	//	Result result = new Result(s, e);
+
 		// minheap to store all Node objects in increasing order
 		PriorityQueue<Node> minNode = new PriorityQueue<Node>();
+
+		// Stores the previous node for every node
+		// Allows to reconstruct the shortest path 
+		HashMap<Integer, Integer> previous = new HashMap<>();
 
 		// Used to see if there are any nodes left to visit
 		int numNodesVisited = 0;
 
 		// Stores the current node in a pass of Dijkstra's Algorithm
 		int currentNode;
-		
-	       // Stores the distance for each vertex	
+
+	       // Stores the distance for each vertex
 		int [] dist = new int [N];
 
 		// Stores all of the nodes that have already been visited
@@ -154,10 +140,10 @@ public class DijkstraSolver
 
 
 		// Initializing distances to each node to infinity
+	
 		for(int i = 0; i < N; i++){
 			dist[i] = Integer.MAX_VALUE;
 		}
-
 
 		// Distance from end node to the end node is 0
 		dist[e] = 0;
@@ -166,39 +152,34 @@ public class DijkstraSolver
 		visited[e] = true;
 		numNodesVisited++;
 
+		previous.put(e, null);
 
 		// Adding all nodes into the minheap with a distance of infinity
-		for(int i = 0; i < N; i++){
-		
-			if(i == e ){
-				minNode.add(new Node(e, 0));
-				continue;
-			}
-				
-			minNode.add(new Node(i, Integer.MAX_VALUE));
-		}
-		
-		
-		while(!minNode.isEmpty() && numNodesVisited <= N){
-		
+		for(int i = 0; i < N; i++)
+			minNode.add(new Node(i, dist[i]));
+
+		System.out.println("MINNODE: " + minNode);
+
+		while(!minNode.isEmpty() && numNodesVisited < N){
+
 			// 1. Find the node with the lowest distance
 			// 2. Make that node the current
 			currentNode = minNode.remove().val;
-			System.out.println("Node with the lowest distance: " + cities[currentNode]);
 
 			// 3. Add it to visited
-			
 			visited[currentNode] = true;
 			numNodesVisited++;
+
 			// 4. Find all adjacent nodes to current node
 			// 5. For all adjacent nodes, update distances
-			
+
 			for(int i = 0; i < N; i++){
 				if(matrix[currentNode][i] > 0 && !visited[i]){
 					if(dist[currentNode] + matrix[currentNode][i] < dist[i]){
-						System.out.println("Adjacent Node: " + cities[i] +" with distance " + matrix[currentNode][i]);
 						dist[i] = dist[currentNode] + matrix[currentNode][i];
 						minNode.add(new Node(i, dist[i]));
+						previous.put(i, currentNode); 
+
 					}
 				}
 			}
@@ -206,23 +187,17 @@ public class DijkstraSolver
 
 		}
 
-		
-//		System.out.println("minNode: " + minNode);
-//		System.out.println("Dist[]: " + Arrays.toString(dist));
-//		System.out.println("visited[]: " + Arrays.toString(visited));
-//		System.out.println("Number of Nodes visited: " + numNodesVisited);
-		print(minNode, dist, visited, numNodesVisited, cities);
+		print(minNode, dist, visited, numNodesVisited, cities, previous);
 
+		String stringy = reconstructPath(previous, s, e);
 
+		int totalWeight = dist[s];
 
-		result.totalWeight = dist[s];
-		result.shortestPath = "No way to recover shortest path ;(";
-
-		return result;
+		return totalWeight;
 	}
-	
-	public static void print(PriorityQueue<Node> minNode, int [] dist, boolean [] visited, int numNodesVisited, String [] cities){
-	
+
+	public static void print(PriorityQueue<Node> minNode, int [] dist, boolean [] visited, int numNodesVisited, String [] cities, HashMap<Integer, Integer> previous){
+
 		System.out.println("minNode: " + minNode);
 		System.out.println();
 		// System.out.println("Dist[]: " + Arrays.toString(dist));
@@ -236,38 +211,82 @@ public class DijkstraSolver
 		System.out.println();
 		System.out.println("Number of Nodes visited: " + numNodesVisited);
 		System.out.println();
+		System.out.println("HashMap: " + previous);
+		System.out.println();
+			
+
+		System.out.println("{Key, Value}");
+		for(int i = 0; i < dist.length; i++){
+
+			System.out.println("{" +cities[i]+"->"+((previous.get(i) == null)? -1 :cities[previous.get(i)])+ "}");
+		}
+
 
 	}
 
+	public static String reconstructPath(HashMap<Integer, Integer> map, int source, int end){
+		ArrayList<Integer> pathArr = new ArrayList<Integer>();
+		String pathStr = null;
+		int current;
+		int i = 0;
 
+	//	Arrays.fill(pathArr, -1);
+
+		// 1. current <- source key
+		// 2. add current to array
+		// 3. current <- value(current) 
+		// 4. Go to step 2
+		
+		current = source;
+
+		//while(map.get(current) != null){
+		//	pathArr[i++] = current; 
+		//	current = map.get(current);
+		//}
+		
+
+		do{
+			pathArr.add(current);		
+			current = map.get(current);
+		}while(map.get(current) != null);
+
+		pathStr = (Arrays.toString(pathArr.toArray()));
+ 
+		pathStr = pathStr.replace("[", "");
+		pathStr = pathStr.replace("]", "");
+		pathStr = pathStr.replace("," , "");		
+		System.out.println("pathStr: '" + pathStr + "'");
+
+		pathStr = pathStr + " " + String.valueOf(end);
+		System.out.println("pathStr: '" + pathStr + "'");
+
+		
+		return pathStr;
+	}
 	public static void main(String [] args) throws Exception
 	{
 
-		
+
 		int [] start = new int[5];
 		int [] end = new int[5];
 		int [] PID = {4,1,9,4,7,8,5};
 		for(int i = 0; (i+2) < PID.length; i++){
 			start[i] = 10*PID[i] + PID[i+1];
 			end[i] = 10*PID[i+1] + PID[i+2];
-
 		}
-		
 
 		// Find the shortest path for each i : {start[i], end[i]}
-		 
 
-//		Result res = new Result(
 		DijkstraSolver matrix = new DijkstraSolver("Toy.txt");
 		matrix.findShortestPath("Toy.txt", 0, 6);
 
 
-
 		// Write to a file in a loop for each i : {start[i], end[i]}
-//		writeToFile("out.txt", sourceToEnd);
-//		appendToFile("out.txt", shortestPath);
-//		appendToFile("out.txt", totalWeight);
-		
+
+		//	writeToFile("out.txt", sourceToEnd);
+		//	appendToFile("out.txt", shortestPath);
+		//	appendToFile("out.txt", totalWeight);
+
 		return;
 	}
 }
