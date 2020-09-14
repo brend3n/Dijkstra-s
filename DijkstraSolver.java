@@ -27,7 +27,7 @@ public class DijkstraSolver
 {
 
 	// Edit this number to adjust for the size of the graph
-	int N = 7;
+	int N;
 	// int N = 100;
 
 	// Creating an adjacency Matrix
@@ -37,7 +37,7 @@ public class DijkstraSolver
 	String [] cities = {"SF", "SE", "DA", "DE", "CH", "AT", "DC"};
 
 	// Constuctor
-	public DijkstraSolver (String fileName) throws Exception
+	public DijkstraSolver (String fileName, int numVertices) throws Exception
 	{
 
 		// Creating a scanner object that will operate
@@ -45,7 +45,10 @@ public class DijkstraSolver
 		// as the input file
 		Scanner scan = new Scanner(new File(fileName));
 
-		matrix = new int [N][N];
+		this.N = numVertices;
+
+		//matrix = new int [N][N];
+		matrix = new int[numVertices][numVertices];
 
 
 		// Formatting for debugging
@@ -86,6 +89,15 @@ public class DijkstraSolver
 
 		}
 
+
+
+
+	// Solve for the shortest path from the source node to the end node using Dijkstra's Algorithm
+
+
+
+
+
 	}
 
 	public static void writeToFile(String filename, String input){
@@ -115,7 +127,7 @@ public class DijkstraSolver
 		}
 	}
 
-	public int findShortestPath(String filename, int s, int e)
+	public void findShortestPath(int s, int e)
 	{
 	//	Result result = new Result(s, e);
 
@@ -123,7 +135,7 @@ public class DijkstraSolver
 		PriorityQueue<Node> minNode = new PriorityQueue<Node>();
 
 		// Stores the previous node for every node
-		// Allows to reconstruct the shortest path 
+		// Allows to reconstruct the shortest path
 		HashMap<Integer, Integer> previous = new HashMap<>();
 
 		// Used to see if there are any nodes left to visit
@@ -140,7 +152,7 @@ public class DijkstraSolver
 
 
 		// Initializing distances to each node to infinity
-	
+
 		for(int i = 0; i < N; i++){
 			dist[i] = Integer.MAX_VALUE;
 		}
@@ -178,7 +190,7 @@ public class DijkstraSolver
 					if(dist[currentNode] + matrix[currentNode][i] < dist[i]){
 						dist[i] = dist[currentNode] + matrix[currentNode][i];
 						minNode.add(new Node(i, dist[i]));
-						previous.put(i, currentNode); 
+						previous.put(i, currentNode);
 
 					}
 				}
@@ -187,13 +199,21 @@ public class DijkstraSolver
 
 		}
 
-		print(minNode, dist, visited, numNodesVisited, cities, previous);
+//		print(minNode, dist, visited, numNodesVisited, cities, previous);
 
-		String stringy = reconstructPath(previous, s, e);
+		String sourceToEnd = String.valueOf(s) + String.valueOf(e);
+		String shortestPath = reconstructPath(previous, s, e);
 
 		int totalWeight = dist[s];
 
-		return totalWeight;
+
+
+		// Writing output to file
+
+		writeToFile("output.txt", sourceToEnd);
+		appendToFile("output.txt", shortestPath);
+		appendToFile("output.txt", String.valueOf(totalWeight));
+
 	}
 
 	public static void print(PriorityQueue<Node> minNode, int [] dist, boolean [] visited, int numNodesVisited, String [] cities, HashMap<Integer, Integer> previous){
@@ -213,7 +233,7 @@ public class DijkstraSolver
 		System.out.println();
 		System.out.println("HashMap: " + previous);
 		System.out.println();
-			
+
 
 		System.out.println("{Key, Value}");
 		for(int i = 0; i < dist.length; i++){
@@ -234,38 +254,74 @@ public class DijkstraSolver
 
 		// 1. current <- source key
 		// 2. add current to array
-		// 3. current <- value(current) 
+		// 3. current <- value(current)
 		// 4. Go to step 2
-		
+
 		current = source;
 
 		//while(map.get(current) != null){
-		//	pathArr[i++] = current; 
+		//	pathArr[i++] = current;
 		//	current = map.get(current);
 		//}
-		
+
 
 		do{
-			pathArr.add(current);		
+			pathArr.add(current);
 			current = map.get(current);
 		}while(map.get(current) != null);
 
 		pathStr = (Arrays.toString(pathArr.toArray()));
- 
+
 		pathStr = pathStr.replace("[", "");
 		pathStr = pathStr.replace("]", "");
-		pathStr = pathStr.replace("," , "");		
+		// pathStr = pathStr.replace("," , "");
+
 		System.out.println("pathStr: '" + pathStr + "'");
 
 		pathStr = pathStr + " " + String.valueOf(end);
 		System.out.println("pathStr: '" + pathStr + "'");
 
-		
+
 		return pathStr;
 	}
+
+//	public static void ssDijsktra(String fileName, int source, int end, int numVertices) throws Exception{
+//		 DijkstraSolver matrix = new DijkstraSolver(fileName, numVertices);
+//		matrix.findShortestPath(fileName, source, end);
+
+//	}
+
 	public static void main(String [] args) throws Exception
 	{
 
+		if (args.length == 0 ){
+			System.out.println("To run Dijkstra's Algorithm");
+			System.out.println("\t javac DijkstraSolver [filename] [source] [end] [number of vertices in graph] ");
+		}else{
+			//for(int i = 0; i < args.length; i++)
+			//	System.out.println("args["+i+"] = " + args[i]);
+
+		//System.out.println("Args Length: " + args.length);
+
+		String fileName = args[0];
+		int source = Integer.parseInt(args[1]);
+		int end = Integer.parseInt(args[2]);
+		int numberOfVertices = Integer.parseInt(args[3]);
+
+		for(int i = 0; i < args.length; i++)
+			System.out.println("args["+i+"] = " + args[i]);
+
+		System.out.println("fileName: " + fileName);
+		System.out.println("source: " + source);
+		System.out.println("end: " + end);
+		System.out.println("numberOfVertices: " + numberOfVertices);
+
+
+
+
+		DijkstraSolver matrix = new DijkstraSolver(fileName, numberOfVertices);
+		matrix.findShortestPath(source, end);
+		}
 
 		int [] start = new int[5];
 		int [] end = new int[5];
@@ -275,10 +331,13 @@ public class DijkstraSolver
 			end[i] = 10*PID[i+1] + PID[i+2];
 		}
 
+//		DijkstraSolver matrix = new DijkstraSolver("Toy.txt");
+
+//		ssDijkstra("Toy.txt", 0,6);
+
 		// Find the shortest path for each i : {start[i], end[i]}
 
-		DijkstraSolver matrix = new DijkstraSolver("Toy.txt");
-		matrix.findShortestPath("Toy.txt", 0, 6);
+//		System.out.println("Total Weight: " + matrix.findShortestPath("Toy.txt", 0, 6));
 
 
 		// Write to a file in a loop for each i : {start[i], end[i]}
