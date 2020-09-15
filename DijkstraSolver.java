@@ -52,11 +52,11 @@ public class DijkstraSolver
 
 
 		// Formatting for debugging
-		System.out.print("   ");
-		for(int i = 0; i < N; i++){
-			System.out.print(i + "  ");
-		}
-		System.out.println();
+//		System.out.print("   ");
+//		for(int i = 0; i < N; i++){
+//			System.out.print(i + "  ");
+//		}
+//		System.out.println();
 
 
 	// Reading in the text file and creating the matrix
@@ -85,7 +85,7 @@ public class DijkstraSolver
 					strScan.skip(" ");
 			}
 
-			System.out.println(i + " " + Arrays.toString(matrix[i]));
+//			System.out.println(i + " " + Arrays.toString(matrix[i]));
 
 		}
 
@@ -121,7 +121,7 @@ public class DijkstraSolver
 			writer.write(input);
 			writer.write("\n");
 			writer.close();
-			System.out.println("Input: " + input +" written to File: " + filename);
+			System.out.println("Input: " + input +" appended to File: " + filename);
 			System.out.println();
 		}catch(IOException f){
 			System.out.println("Error in: findContrainedShortestPaths(" + filename +")\n Exception: " + f);
@@ -171,9 +171,9 @@ public class DijkstraSolver
 		for(int i = 0; i < N; i++)
 			minNode.add(new Node(i, dist[i]));
 
-		System.out.println("MINNODE: " + minNode);
+//		System.out.println("MINNODE: " + minNode);
 
-		while(!minNode.isEmpty() && numNodesVisited < N){
+		while(!minNode.isEmpty() ||  numNodesVisited <= N){
 
 			// 1. Find the node with the lowest distance
 			// 2. Make that node the current
@@ -200,9 +200,9 @@ public class DijkstraSolver
 
 		}
 
-		print(minNode, dist, visited, numNodesVisited, cities, previous);
+//		print(minNode, dist, visited, numNodesVisited, cities, previous);
 
-		String sourceToEnd = String.valueOf(s) +" " +  String.valueOf(e);
+		String sourceToEnd = String.valueOf(s) +", " +  String.valueOf(e);
 		String shortestPath = reconstructPath(previous, s, e);
 
 		int totalWeight = dist[s];
@@ -274,25 +274,42 @@ public class DijkstraSolver
 		//	current = map.get(current);
 		//}
 
-		
+	
+	//	while(map.get(current) != null) {
+	//		pathArr.add(current);
+	//		if(source == end)
+	//			break;
+	//		current = map.get(current);
+	//	}
+		System.out.println(map);
+
+		System.out.println(map.containsKey(source));
+			
 
 		do{
 			pathArr.add(current);
 			if(source == end)
 				break;
+			if(map.get(current) == null){
+				System.out.println("here dumbeass");
+				break;
+			}
+					
 
 			current = map.get(current);
 		}while(map.get(current) != null);
 
+		pathArr.add(end);
 		pathStr = (Arrays.toString(pathArr.toArray()));
 
+//		System.out.println("pathArr: " + pathArr);
 		pathStr = pathStr.replace("[", "");
 		pathStr = pathStr.replace("]", "");
 		// pathStr = pathStr.replace("," , "");
 
-		System.out.println("pathStr: '" + pathStr + "'");
+//		System.out.println("pathStr: '" + pathStr + "'");
 
-		pathStr = pathStr + " " + String.valueOf(end);
+//		pathStr = pathStr + () " " + String.valueOf(end);
 		// System.out.println("pathStr: '" + pathStr + "'");
 //		System.out.println(Arrays.toString(cities));
 
@@ -322,16 +339,13 @@ public class DijkstraSolver
 		int end = Integer.parseInt(args[2]);
 		int numberOfVertices = Integer.parseInt(args[3]);
 
-		for(int i = 0; i < args.length; i++)
-			System.out.println("args["+i+"] = " + args[i]);
+		//for(int i = 0; i < args.length; i++)
+		//	System.out.println("args["+i+"] = " + args[i]);
 
-		System.out.println("fileName: " + fileName);
-		System.out.println("source: " + source);
-		System.out.println("end: " + end);
-		System.out.println("numberOfVertices: " + numberOfVertices);
-
-
-
+		//System.out.println("fileName: " + fileName);
+		//System.out.println("source: " + source);
+		//System.out.println("end: " + end);
+		//System.out.println("numberOfVertices: " + numberOfVertices);
 
 		DijkstraSolver matrix = new DijkstraSolver(fileName, numberOfVertices);
 		matrix.findShortestPath(source, end);
@@ -344,6 +358,8 @@ public class DijkstraSolver
 			start[i] = 10*PID[i] + PID[i+1];
 			end[i] = 10*PID[i+1] + PID[i+2];
 		}
+		System.out.println(Arrays.toString(start));
+		System.out.println(Arrays.toString(end));
 
 //		DijkstraSolver matrix = new DijkstraSolver("Toy.txt");
 
