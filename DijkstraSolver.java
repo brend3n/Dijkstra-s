@@ -104,7 +104,7 @@ public class DijkstraSolver
 
 		try{
 			FileWriter writer = new FileWriter(filename);
-			writer.write(input);
+			writer.write(input + "\n");
 			writer.close();
 			System.out.println("Input: " + input +" written to File: " + filename);
 			System.out.println();
@@ -119,6 +119,7 @@ public class DijkstraSolver
 		try{
 			FileWriter writer = new FileWriter(filename, true);
 			writer.write(input);
+			writer.write("\n");
 			writer.close();
 			System.out.println("Input: " + input +" written to File: " + filename);
 			System.out.println();
@@ -199,9 +200,9 @@ public class DijkstraSolver
 
 		}
 
-//		print(minNode, dist, visited, numNodesVisited, cities, previous);
+		print(minNode, dist, visited, numNodesVisited, cities, previous);
 
-		String sourceToEnd = String.valueOf(s) + String.valueOf(e);
+		String sourceToEnd = String.valueOf(s) +" " +  String.valueOf(e);
 		String shortestPath = reconstructPath(previous, s, e);
 
 		int totalWeight = dist[s];
@@ -223,7 +224,7 @@ public class DijkstraSolver
 		// System.out.println("Dist[]: " + Arrays.toString(dist));
 		for(int i = 0; i < dist.length; i++)
 		{
-			System.out.println(cities[i] + ": " + dist[i]);
+			System.out.println(i +": " + cities[i] + ": " + dist[i]);
 		}
 
 		System.out.println();
@@ -257,6 +258,15 @@ public class DijkstraSolver
 		// 3. current <- value(current)
 		// 4. Go to step 2
 
+
+//		if (source == end){
+
+//			pathStr = String.valueOf(source) + " " + String.valueOf(end);
+//			return pathStr;
+//		}
+
+
+
 		current = source;
 
 		//while(map.get(current) != null){
@@ -264,9 +274,13 @@ public class DijkstraSolver
 		//	current = map.get(current);
 		//}
 
+		
 
 		do{
 			pathArr.add(current);
+			if(source == end)
+				break;
+
 			current = map.get(current);
 		}while(map.get(current) != null);
 
@@ -279,8 +293,8 @@ public class DijkstraSolver
 		System.out.println("pathStr: '" + pathStr + "'");
 
 		pathStr = pathStr + " " + String.valueOf(end);
-		System.out.println("pathStr: '" + pathStr + "'");
-
+		// System.out.println("pathStr: '" + pathStr + "'");
+//		System.out.println(Arrays.toString(cities));
 
 		return pathStr;
 	}
