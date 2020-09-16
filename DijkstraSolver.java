@@ -7,7 +7,6 @@ class Node implements Comparable<Node>{
 	int dist;
 
 	Node(int val, int dist){
-
 		this.val = val;
 		this.dist = dist;
 	}
@@ -15,9 +14,7 @@ class Node implements Comparable<Node>{
 		return this.dist - n.dist;
 	}
 	public String toString(){
-		// return "[Value, Distance] =  ["+ val+", " +dist+ "]";
 		 return "["+ val+", " +dist+ "]";
-
 	}
 
 }
@@ -25,81 +22,56 @@ class Node implements Comparable<Node>{
 
 public class DijkstraSolver
 {
-
-	// Edit this number to adjust for the size of the graph
+	// Stores the number of nodes in a the graph
 	int N;
-	// int N = 100;
 
 	// Creating an adjacency Matrix
 	int [][] matrix;
-
-
-	String [] cities = {"SF", "SE", "DA", "DE", "CH", "AT", "DC"};
 
 	// Constuctor
 	public DijkstraSolver (String fileName, int numVertices) throws Exception
 	{
 
-		// Creating a scanner object that will operate
-		// on a file object with the passed in parameter
-		// as the input file
+		// Opens the passed in file and allows the filed to be read
 		Scanner scan = new Scanner(new File(fileName));
 
+		// Storing the number of vertices/nodes in the graph
 		this.N = numVertices;
 
-		//matrix = new int [N][N];
+		// Declaring a 2-D  integer array to act as the adjacency matrix
 		matrix = new int[numVertices][numVertices];
 
 
-		// Formatting for debugging
-//		System.out.print("   ");
-//		for(int i = 0; i < N; i++){
-//			System.out.print(i + "  ");
-//		}
-//		System.out.println();
-
-
-	// Reading in the text file and creating the matrix
-
-
+		// Reading in the text file and creating the matrix
 		for (int i = 0; i < N; i++){
 
+			// Reading in the first charater of each row. This represents the number of the row starting at 0.
 			int rowNum = scan.nextInt();
 
 			// Ignoring the tab
 			scan.skip("\t");
-
+				
+			// Capture the entire row as a String to be parsed
 			String str = scan.nextLine();
 
-			// Setting up the string for parsing
+			// Setting up the string for parsing.
+			// Replacing deleting all commas
 			str = str.replace(",", " ");
 
 			// Begin to parse string
 			Scanner strScan = new Scanner(str);
 
-
+			// Reading each edge in the text file and adding it to the adjacency matrix
 			for (int j = 0; j < N; j++){
 				if(strScan.hasNextInt())
 					matrix[i][j] = strScan.nextInt();
 				else
 					strScan.skip(" ");
 			}
-
-//			System.out.println(i + " " + Arrays.toString(matrix[i]));
-
 		}
-
-
-
-
-	// Solve for the shortest path from the source node to the end node using Dijkstra's Algorithm
-
-
-
-
-
 	}
 
+	// Writes the input string (input) into the first line of the output file (filename)
 	public static void writeToFile(String filename, String input){
 
 		try{
@@ -115,6 +87,8 @@ public class DijkstraSolver
 
 
 	}
+
+	// Appends the input string (input) to the output file (filename)
 	public static void appendToFile(String filename, String input){
 		try{
 			FileWriter writer = new FileWriter(filename, true);
@@ -128,11 +102,11 @@ public class DijkstraSolver
 		}
 	}
 
+	// Prints the shortest path between the source vertex/node (s) and the end vertex/node (e)
 	public void findShortestPath(int s, int e)
 	{
-	//	Result result = new Result(s, e);
 
-		// minheap to store all Node objects in increasing order
+		// Minheap to store all Node objects in increasing order
 		PriorityQueue<Node> minNode = new PriorityQueue<Node>();
 
 		// Stores the previous node for every node
@@ -145,15 +119,13 @@ public class DijkstraSolver
 		// Stores the current node in a pass of Dijkstra's Algorithm
 		int currentNode;
 
-	       // Stores the distance for each vertex
+	       	// Stores the distance for each vertex
 		int [] dist = new int [N];
 
 		// Stores all of the nodes that have already been visited
 		boolean [] visited = new boolean[N];
 
-
 		// Initializing distances to each node to infinity
-
 		for(int i = 0; i < N; i++){
 			dist[i] = Integer.MAX_VALUE;
 		}
@@ -165,18 +137,21 @@ public class DijkstraSolver
 		visited[e] = true;
 		numNodesVisited++;
 
+		// Used to recover the shortest path. Since the end node is the first node inserted
+		// into the path recovery structure, it has no previous node. Thus, it is set to null.
 		previous.put(e, null);
 
 		// Adding all nodes into the minheap with a distance of infinity
 		for(int i = 0; i < N; i++)
 			minNode.add(new Node(i, dist[i]));
 
-//		System.out.println("MINNODE: " + minNode);
-
+		// Loops as long as there are nodes to be visited
 		while(!minNode.isEmpty() ||  numNodesVisited <= N){
 
 			// 1. Find the node with the lowest distance
 			// 2. Make that node the current
+	
+			// Get node with the lowest distance
 			currentNode = minNode.remove().val;
 
 			// 3. Add it to visited
@@ -186,195 +161,97 @@ public class DijkstraSolver
 			// 4. Find all adjacent nodes to current node
 			// 5. For all adjacent nodes, update distances
 
+			// For all adjacent nodes, update their distances if a shorter path is found
 			for(int i = 0; i < N; i++){
 				if(matrix[currentNode][i] > 0 && !visited[i]){
 					if(dist[currentNode] + matrix[currentNode][i] < dist[i]){
 						dist[i] = dist[currentNode] + matrix[currentNode][i];
 						minNode.add(new Node(i, dist[i]));
 						previous.put(i, currentNode);
-
 					}
 				}
 			}
-
-
 		}
 
-//		print(minNode, dist, visited, numNodesVisited, cities, previous);
-
+		// Constructing the string that shows the source and target node that will be passed into the algorithm
+		// This is the format of the string: Source, Target
 		String sourceToEnd = String.valueOf(s) +", " +  String.valueOf(e);
+
+		// Stores the reconstructed path that this implementation of Dijkstra's shortest path algorithm takes
 		String shortestPath = reconstructPath(previous, s, e);
 
 		int totalWeight = dist[s];
 
 
-
 		// Writing output to file
-
 		writeToFile("output.txt", sourceToEnd);
 		appendToFile("output.txt", shortestPath);
 		appendToFile("output.txt", String.valueOf(totalWeight));
 
 	}
 
-	public static void print(PriorityQueue<Node> minNode, int [] dist, boolean [] visited, int numNodesVisited, String [] cities, HashMap<Integer, Integer> previous){
-
-		System.out.println("minNode: " + minNode);
-		System.out.println();
-		// System.out.println("Dist[]: " + Arrays.toString(dist));
-		for(int i = 0; i < dist.length; i++)
-		{
-			System.out.println(i +": " + cities[i] + ": " + dist[i]);
-		}
-
-		System.out.println();
-		System.out.println("visited[]: " + Arrays.toString(visited));
-		System.out.println();
-		System.out.println("Number of Nodes visited: " + numNodesVisited);
-		System.out.println();
-		System.out.println("HashMap: " + previous);
-		System.out.println();
-
-
-		System.out.println("{Key, Value}");
-		for(int i = 0; i < dist.length; i++){
-
-			System.out.println("{" +cities[i]+"->"+((previous.get(i) == null)? -1 :cities[previous.get(i)])+ "}");
-		}
-
-
-	}
-
+	// Recovers the path from this implementation of Dijkstra's shortest path algorithm
 	public static String reconstructPath(HashMap<Integer, Integer> map, int source, int end){
+
 		ArrayList<Integer> pathArr = new ArrayList<Integer>();
 		String pathStr = null;
 		int current;
 		int i = 0;
 
-	//	Arrays.fill(pathArr, -1);
-
-		// 1. current <- source key
-		// 2. add current to array
-		// 3. current <- value(current)
-		// 4. Go to step 2
-
-
-//		if (source == end){
-
-//			pathStr = String.valueOf(source) + " " + String.valueOf(end);
-//			return pathStr;
-//		}
-
-
-
+		// The first element of the path should be the source node
 		current = source;
-
-		//while(map.get(current) != null){
-		//	pathArr[i++] = current;
-		//	current = map.get(current);
-		//}
-
-	
-	//	while(map.get(current) != null) {
-	//		pathArr.add(current);
-	//		if(source == end)
-	//			break;
-	//		current = map.get(current);
-	//	}
-		System.out.println(map);
-
-		System.out.println(map.containsKey(source));
-			
-
+		
+		// Loops until it finds the end/targer node.
+		// There is no previous node of the end/target vertex due to the implementation of the findShortestPath method.
+		// This implementation works backwards from the end/target node to the source node.
+		// The previous node of the target node is null.
 		do{
+			// Add node to the path
 			pathArr.add(current);
+
+
+			// Checks for if the node has reached the end/target node or if there is a path with only 1 node
 			if(source == end)
 				break;
-			if(map.get(current) == null){
-				System.out.println("here dumbeass");
+			if(map.get(current) == null)
 				break;
-			}
-					
 
+			// Get the previous node of this node
 			current = map.get(current);
+
 		}while(map.get(current) != null);
 
+		// Append the end/target node to the path
 		pathArr.add(end);
+
+		// Convert the ArrayList into a string
 		pathStr = (Arrays.toString(pathArr.toArray()));
 
-//		System.out.println("pathArr: " + pathArr);
+		// Removing the brackets from the string pathStr
 		pathStr = pathStr.replace("[", "");
 		pathStr = pathStr.replace("]", "");
-		// pathStr = pathStr.replace("," , "");
 
-//		System.out.println("pathStr: '" + pathStr + "'");
-
-//		pathStr = pathStr + () " " + String.valueOf(end);
-		// System.out.println("pathStr: '" + pathStr + "'");
-//		System.out.println(Arrays.toString(cities));
 
 		return pathStr;
 	}
 
-//	public static void ssDijsktra(String fileName, int source, int end, int numVertices) throws Exception{
-//		 DijkstraSolver matrix = new DijkstraSolver(fileName, numVertices);
-//		matrix.findShortestPath(fileName, source, end);
-
-//	}
-
 	public static void main(String [] args) throws Exception
 	{
 
-		if (args.length == 0 ){
+		if (args.length < 4 ){
 			System.out.println("To run Dijkstra's Algorithm");
 			System.out.println("\t javac DijkstraSolver [filename] [source] [end] [number of vertices in graph] ");
 		}else{
-			//for(int i = 0; i < args.length; i++)
-			//	System.out.println("args["+i+"] = " + args[i]);
 
-		//System.out.println("Args Length: " + args.length);
 
-		String fileName = args[0];
-		int source = Integer.parseInt(args[1]);
-		int end = Integer.parseInt(args[2]);
-		int numberOfVertices = Integer.parseInt(args[3]);
+			String fileName = args[0];
+			int source = Integer.parseInt(args[1]);
+			int end = Integer.parseInt(args[2]);
+			int numberOfVertices = Integer.parseInt(args[3]);
 
-		//for(int i = 0; i < args.length; i++)
-		//	System.out.println("args["+i+"] = " + args[i]);
-
-		//System.out.println("fileName: " + fileName);
-		//System.out.println("source: " + source);
-		//System.out.println("end: " + end);
-		//System.out.println("numberOfVertices: " + numberOfVertices);
-
-		DijkstraSolver matrix = new DijkstraSolver(fileName, numberOfVertices);
-		matrix.findShortestPath(source, end);
+			DijkstraSolver matrix = new DijkstraSolver(fileName, numberOfVertices);
+			matrix.findShortestPath(source, end);
 		}
-
-		int [] start = new int[5];
-		int [] end = new int[5];
-		int [] PID = {4,1,9,4,7,8,5};
-		for(int i = 0; (i+2) < PID.length; i++){
-			start[i] = 10*PID[i] + PID[i+1];
-			end[i] = 10*PID[i+1] + PID[i+2];
-		}
-		System.out.println(Arrays.toString(start));
-		System.out.println(Arrays.toString(end));
-
-//		DijkstraSolver matrix = new DijkstraSolver("Toy.txt");
-
-//		ssDijkstra("Toy.txt", 0,6);
-
-		// Find the shortest path for each i : {start[i], end[i]}
-
-//		System.out.println("Total Weight: " + matrix.findShortestPath("Toy.txt", 0, 6));
-
-
-		// Write to a file in a loop for each i : {start[i], end[i]}
-
-		//	writeToFile("out.txt", sourceToEnd);
-		//	appendToFile("out.txt", shortestPath);
-		//	appendToFile("out.txt", totalWeight);
 
 		return;
 	}
